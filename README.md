@@ -1,2 +1,133 @@
 # AbletonOsc
 Project for sending spatial data to ableton to control sound parameters
+
+## How to
+
+For sending and receiveing data to Ableton Live from Unity there is the `LiveOscManager` singleton class in the `AbletonOsc` namespace. This wraps functionality for the OSC library, [uOSC](1).
+
+### Sending data
+
+Using the `LiveOscManager` from any script you just define the address and data you wish to send and pass to the class instance, like in the `SendStartCommand` example:
+
+```csharp
+public class SendStartCommand : MonoBehaviour
+{
+    // If you pass this command to a LiveAPI object you can trigger start/stop
+    public string startCommand = "/song/start";
+
+    private void Start()
+    {
+        LiveOscManager.Instance.Send(startCommand, 1);
+    }
+}
+```
+
+If you wish to send messages yourself, like in `SendMessageExample`:
+
+```csharp
+public class SendMessageExample : MonoBehaviour
+{
+    private void Start()
+    {
+        // Send a message to the live api to change song quantization at startup.
+        string address = "/song/quantization";
+        int sixteenths = 11; // 11 == 1/16 in live quantization labels.
+        Message setQuantization = new Message(address, sixteenths);
+
+        Message sendMultipleDataTypes =
+            new Message("/sum/funky/parameterAddress", 1.4f, 1, "words", new byte[] {1, 5, 3, 7});
+
+        LiveOscManager.Instance.Send(setQuantization);
+        LiveOscManager.Instance.Send(sendMultipleDataTypes);
+    }
+}
+```
+
+### Receiving data
+
+For any scripts that need to do stuff based on data from ableton, just subscribe to the `OnDataReceived` event (type of `DataReceiveEvent : UnityEvent<Message>`), like the `PrintServerMessageInput`:
+
+```csharp
+public class PrintServerMessageInput : MonoBehaviour
+{
+    private void Start()
+    {
+        LiveOscManager.Instance.OnDataReceived.AddListener(OnDataReceived);
+    }
+
+    private static void OnDataReceived(Message message)
+    {
+        // address
+        var msg = message.address + " : ";
+
+        // timestamp
+        msg += "(" + message.timestamp.ToLocalTime() + ") ";
+
+        // values
+        foreach (var value in message.values)
+        {
+            msg += value.GetString() + " ";
+        }
+
+        Debug.Log(msg);
+    }
+}
+```
+A simple receiver would check if the message address is what is needed and then do stuff if it matches, like `SimpleMessageChecker` script (use the `SimpleMessageCheckerTester` max patch to send data):
+```csharp
+public class SimpleMessageChecker : MonoBehaviour
+{
+    // You can use the SimpleMessageCheckerTester.maxpat to send data for testing.
+
+    // Imagine sending track volume and mapping it to scale
+    public string responseAddress = "/track/1/volume";
+
+    private void Start()
+    {
+        LiveOscManager.Instance.OnDataReceived.AddListener(OnDataReceived);
+    }
+
+    private void OnDataReceived(Message message)
+    {
+        if (message.address != responseAddress) return;
+
+        if (message.values.Length <= 0) return;
+
+        var value = message.values[0];
+
+        if (!(value is float)) return;
+
+        var floatNum = (float) value;
+        var scale = new Vector3(floatNum, floatNum, floatNum);
+        transform.localScale = scale;
+    }
+}
+```
+
+### Data types
+
++ Int :: `int`
++ Float :: `float`
++ String :: `string`
++ Blobs :: `byte[]`
+
+Do not add things like `float[]` to message parameters, these will be ignored by the client sending process, add each one separately. E.g
+```csharp
+// THIS WILL NOT WORK
+float[] postionXyz = new float[]{1f,2f,3f};
+LiveOscManager.Instance.Send("/object/x/position", positionXyz);
+
+// DO THIS
+LiveOscManager.Instance.Send("/object/x/position", positionXyz[0], positionXyz[1], positionXyz[1]);
+```
+
+
+
+If you are sending lots of arrays, you can write a wrapper to convert arrays to lists of object suitable for the clent sending process.
+
+## TODO
+
++ [ ] Add LiveAPI access through javascript in maxpatch
++ [ ] Finish CommandsLookup system to reply to incomming OSC message with funciton calls and events.
+
+[1]:https://github.com/hecomi/uOSC
