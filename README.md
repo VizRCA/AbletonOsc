@@ -121,9 +121,21 @@ LiveOscManager.Instance.Send("/object/x/position", positionXyz);
 LiveOscManager.Instance.Send("/object/x/position", positionXyz[0], positionXyz[1], positionXyz[1]);
 ```
 
-
-
 If you are sending lots of arrays, you can write a wrapper to convert arrays to lists of object suitable for the clent sending process.
+
+----
+### Transform Sender Script
+
+This script collects most of the spatial data needed for passing to ableton. You can enable different send type (position, euler rotation, scale), and it has a set of mapping functions available in the editor.
+
+You can test this function using the `OSC Bundle` M4L patch. The naming is specifc, you send `/object/x`, where `x` is is a number 0...n. The data parameter is automatically added to messages in the bundle i.e. sending all data types per update you would receive the following OSC messages (from the bundle) in Ableton Live:
+```
+/object/1/position 0.5 0.3 0.2
+/object/1/rotation 130 145.5 99.3
+/object/1/scale 1 1 1
+```
+You can then use the mapping buttons in the M4L patch to connect this to funcitonality in Live.
+
 
 ## TODO
 
