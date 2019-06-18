@@ -22,9 +22,9 @@ public class ServerBlobTest : MonoBehaviour
 
     void OnDataReceived(Message message)
     {
-        if (message.address == "/uOSC/blob")
+        if (message.Address == "/uOSC/blob")
         {
-            var byteTexture = (byte[])message.values[0];
+            var byteTexture = (byte[])message.Values[0];
 #if UNITY_2017
             ImageConversion.LoadImage(texture_, byteTexture, true);
 #else

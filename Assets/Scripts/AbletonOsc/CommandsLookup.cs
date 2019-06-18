@@ -5,6 +5,9 @@ using uOSC;
 
 namespace AbletonOsc
 {
+    /// <summary>
+    /// This was an initial idea, been replaced by simpler hashtable method in the server, means messages only need to be relayed once at point of being dequed
+    /// </summary>
     public class CommandsLookup : MonoBehaviour
     {
         private IServer _server;
@@ -29,9 +32,9 @@ namespace AbletonOsc
 
         private void ParseCommand(Message packet)
         {
-            if (_commands.ContainsKey(packet.address))
+            if (_commands.ContainsKey(packet.Address))
             {
-                _commands[packet.address].DynamicInvoke(packet.values[0]);
+                _commands[packet.Address].DynamicInvoke(packet.Values[0]);
             }
         }
 

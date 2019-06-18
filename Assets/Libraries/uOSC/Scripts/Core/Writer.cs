@@ -19,7 +19,7 @@ public static class Writer
 
     public static void Write(MemoryStream stream, Timestamp value)
     {
-        var byteValue = BitConverter.GetBytes(value.value);
+        var byteValue = BitConverter.GetBytes(value.Value);
         Array.Reverse(byteValue);
         stream.Write(byteValue, 0, byteValue.Length);
     }

@@ -13,13 +13,13 @@ namespace AbletonOsc.Examples
         private static void OnDataReceived(Message message)
         {
             // address
-            var msg = message.address + " : ";
+            var msg = message.Address + " : ";
 
             // timestamp
-            msg += "(" + message.timestamp.ToLocalTime() + ") ";
+            msg += "(" + message.Timestamp.ToLocalTime() + ") ";
 
             // values
-            foreach (var value in message.values)
+            foreach (var value in message.Values)
             {
                 msg += value.GetString() + " ";
             }

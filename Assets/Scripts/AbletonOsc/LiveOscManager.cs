@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -13,6 +14,7 @@ namespace AbletonOsc
         private Thread _threadServer = new uOSC.DotNet.Thread();
         private Parser _parser = new Parser();
         public DataReceiveEvent OnDataReceived { get; set; }
+        Hashtable _addressTable;
 
 
 
@@ -27,6 +29,7 @@ namespace AbletonOsc
 
         private void Awake()
         {
+            _addressTable = new Hashtable();
             OnDataReceived = new DataReceiveEvent();
             Init();
         }
@@ -53,20 +56,51 @@ namespace AbletonOsc
 
         private void Update()
         {
-            while (_parser.messageCount > 0)
+            while (_parser.MessageCount > 0)
             {
                 var message = _parser.Dequeue();
                 OnDataReceived.Invoke(message);
+                var al = (ArrayList)Hashtable.Synchronized(_addressTable)[message.Address];
+                
+                if (al == null) continue;
+                
+                foreach (MessageHandler handler in al)
+                {
+                    handler(message);
+                }
             }
         }
 
         private void UpdateMessage()
         {
-            while (_udpServer.messageCount > 0)
+            while (_udpServer.MessageCount > 0)
             {
                 var buf = _udpServer.Receive();
                 int pos = 0;
                 _parser.Parse(buf, ref pos, buf.Length);
+            }
+        }
+
+        /// <summary>
+        /// Set the method to call back on when a message with the specified
+        /// address is received.  The method needs to have the OscMessageHandler signature - i.e. 
+        /// void amh( OscMessage oscM )
+        /// </summary>
+        /// <param name="address">Address string to be matched</param>   
+        /// <param name="messageHandler">The method to call back on.</param>   
+        public void SetAddressHandler(string address, MessageHandler messageHandler)
+
+        {
+            ArrayList al = (ArrayList)Hashtable.Synchronized(_addressTable)[address];
+            if (al == null)
+            {
+                al = new ArrayList();
+                al.Add(messageHandler);
+                Hashtable.Synchronized(_addressTable).Add(address, al);
+            }
+            else
+            {
+                al.Add(messageHandler);
             }
         }
 
@@ -117,8 +151,8 @@ namespace AbletonOsc
         {
             Send(new Message()
             {
-                address = address,
-                values = values
+                Address = address,
+                Values = values
             });
         }
 

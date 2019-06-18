@@ -5,18 +5,18 @@ namespace uOSC
 
 public struct Timestamp
 {
-    public UInt64 value;
+    public UInt64 Value;
 
     public Timestamp(UInt64 value)
     {
-        this.value = value;
+        Value = value;
     }
 
     public static readonly Timestamp Immediate = new Timestamp(0x1u);
 
     public static Timestamp Now
     {
-        get { return Timestamp.CreateFromDateTime(DateTime.UtcNow); }
+        get { return CreateFromDateTime(DateTime.UtcNow); }
     }
 
     public static Timestamp CreateFromDateTime(DateTime time)
@@ -32,8 +32,8 @@ public struct Timestamp
 
     public DateTime ToUtcTime()
     {
-        var integerPart = (UInt32)((value >> 32) & 0xFFFFFFFF); 
-        var decimalPart = (UInt32)(value & 0xFFFFFFFF); 
+        var integerPart = (UInt32)((Value >> 32) & 0xFFFFFFFF); 
+        var decimalPart = (UInt32)(Value & 0xFFFFFFFF); 
         var msec = (UInt32)(((Double)decimalPart / UInt32.MaxValue) * 1000); 
         var baseDate = new DateTime(1900, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
         return baseDate.AddSeconds(integerPart).AddMilliseconds(msec);
@@ -45,7 +45,7 @@ public struct Timestamp
         return TimeZoneInfo.ConvertTime(ToUtcTime(), TimeZoneInfo.Local);
 #else
         var utc = ToUtcTime();
-        var timeZone = System.TimeZone.CurrentTimeZone;
+        var timeZone = TimeZone.CurrentTimeZone;
         return utc + timeZone.GetUtcOffset(DateTime.Now);
 #endif
     }

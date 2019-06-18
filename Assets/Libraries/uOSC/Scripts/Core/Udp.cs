@@ -8,7 +8,7 @@ namespace uOSC
 
 public abstract class Udp
 {
-    public abstract int messageCount { get; }
+    public abstract int MessageCount { get; }
     public abstract void StartServer(int port);
     public abstract void StartClient(string address, int port);
     public abstract void Stop();

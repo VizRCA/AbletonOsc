@@ -18,12 +18,12 @@ public class Parser
 {
     public static readonly object[] EmptyObjectArray = new object[0];
 
-    object lockObject_ = new object();
-    Queue<Message> messages_ = new Queue<Message>();
+    private object _lockObject = new object();
+    private Queue<Message> _messages = new Queue<Message>();
 
-    public int messageCount
+    public int MessageCount
     {
-        get { return messages_.Count; }
+        get { return _messages.Count; }
     }
 
     public void Parse(byte[] buf, ref int pos, int endPos, ulong timestamp = 0x1u)
@@ -37,13 +37,13 @@ public class Parser
         else
         {
             var values = ParseData(buf, ref pos);
-            lock (lockObject_)
+            lock (_lockObject)
             {
-                messages_.Enqueue(new Message() 
+                _messages.Enqueue(new Message() 
                 {
-                    address = first,
-                    timestamp = new Timestamp(timestamp),
-                    values = values
+                    Address = first,
+                    Timestamp = new Timestamp(timestamp),
+                    Values = values
                 });
             }
         }
@@ -59,18 +59,18 @@ public class Parser
 
     public Message Dequeue()
     {
-        if (messageCount == 0)
+        if (MessageCount == 0)
         {
-            return Message.none;
+            return Message.None;
         }
 
-        lock (lockObject_)
+        lock (_lockObject)
         {
-            return messages_.Dequeue();
+            return _messages.Dequeue();
         }
     }
 
-    void ParseBundle(byte[] buf, ref int pos, int endPos)
+    private void ParseBundle(byte[] buf, ref int pos, int endPos)
     {
         var time = Reader.ParseTimetag(buf, ref pos);
 
@@ -89,7 +89,7 @@ public class Parser
         }
     }
 
-    object[] ParseData(byte[] buf, ref int pos)
+    private object[] ParseData(byte[] buf, ref int pos)
     {
         // remove ','
         var types = Reader.ParseString(buf, ref pos).Substring(1);

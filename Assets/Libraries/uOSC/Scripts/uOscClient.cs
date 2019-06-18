@@ -85,8 +85,8 @@ namespace uOSC
     {
         Send(new Message() 
         {
-            address = address,
-            values = values
+            Address = address,
+            Values = values
         });
     }
 

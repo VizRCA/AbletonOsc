@@ -6,37 +6,37 @@ namespace uOSC
 
 public class Bundle
 {
-    private Timestamp timestamp;
-    private List<object> elements_ = new List<object>();
+    private Timestamp _timestamp;
+    private List<object> _elements = new List<object>();
 
     public Bundle()
     {
-        this.timestamp = Timestamp.Immediate;
+        _timestamp = Timestamp.Immediate;
     }
 
     public Bundle(Timestamp timestamp)
     {
-        this.timestamp = timestamp;
+        _timestamp = timestamp;
     }
 
     public void Add(Message message)
     {
-        elements_.Add(message);
+        _elements.Add(message);
     }
 
     public void Add(Bundle bundle)
     {
-        elements_.Add(bundle);
+        _elements.Add(bundle);
     }
 
     public void Write(MemoryStream stream)
     {
         Writer.Write(stream, Identifier.Bundle);
-        Writer.Write(stream, timestamp);
+        Writer.Write(stream, _timestamp);
 
-        for (int i = 0; i < elements_.Count; ++i)
+        for (int i = 0; i < _elements.Count; ++i)
         {
-            var elem = elements_[i];
+            var elem = _elements[i];
             if (elem is Message)
             {
                 Write(stream, (Message)elem);
@@ -48,7 +48,7 @@ public class Bundle
         }
     }
 
-    void Write(MemoryStream stream, Message message)
+    private void Write(MemoryStream stream, Message message)
     {
         using (var tmpStream = new MemoryStream())
         {
@@ -57,7 +57,7 @@ public class Bundle
         }
     }
 
-    void Write(MemoryStream stream, Bundle bundle)
+    private void Write(MemoryStream stream, Bundle bundle)
     {
         using (var tmpStream = new MemoryStream())
         {

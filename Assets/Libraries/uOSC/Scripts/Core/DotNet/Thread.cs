@@ -8,28 +8,28 @@ namespace uOSC.DotNet
 
 public class Thread : uOSC.Thread
 {
-    System.Threading.Thread thread_;
-    bool isRunning_ = false;
-    Action loopFunc_ = null;
+    private System.Threading.Thread _thread;
+    private bool _isRunning = false;
+    private Action _loopFunc = null;
 
     public override void Start(Action loopFunc)
     {
-        if (isRunning_ || loopFunc == null) return;
+        if (_isRunning || loopFunc == null) return;
 
-        isRunning_ = true;
-        loopFunc_ = loopFunc;
+        _isRunning = true;
+        _loopFunc = loopFunc;
 
-        thread_ = new System.Threading.Thread(ThreadLoop);
-        thread_.Start();
+        _thread = new System.Threading.Thread(ThreadLoop);
+        _thread.Start();
     }
 
-    void ThreadLoop()
+    private void ThreadLoop()
     {
-        while (isRunning_)
+        while (_isRunning)
         {
             try
             {
-                loopFunc_();
+                _loopFunc();
                 System.Threading.Thread.Sleep(IntervalMillisec);
             }
             catch (Exception e)
@@ -42,16 +42,16 @@ public class Thread : uOSC.Thread
 
     public override void Stop(int timeoutMilliseconds = 3000)
     {
-        if (!isRunning_) return;
+        if (!_isRunning) return;
 
-        isRunning_ = false;
+        _isRunning = false;
 
-        if (thread_.IsAlive)
+        if (_thread.IsAlive)
         {
-            thread_.Join(timeoutMilliseconds);
-            if (thread_.IsAlive)
+            _thread.Join(timeoutMilliseconds);
+            if (_thread.IsAlive)
             {
-                thread_.Abort();
+                _thread.Abort();
             }
         }
     }

@@ -10,41 +10,42 @@ namespace uOSC.DotNet
 
 public class Udp : uOSC.Udp
 {
-    enum State
+    private enum State
     {
         Stop,
         Server,
         Client,
     }
-    State state_ = State.Stop;
 
-    Queue<byte[]> messageQueue_ = new Queue<byte[]>();
-    object lockObject_ = new object();
+    private State _state = State.Stop;
 
-    UdpClient udpClient_;
-    IPEndPoint endPoint_;
-    Thread thread_ = new Thread();
+    private Queue<byte[]> _messageQueue = new Queue<byte[]>();
+    private object _lockObject = new object();
 
-    public override int messageCount
+    private UdpClient _udpClient;
+    private IPEndPoint _endPoint;
+    private Thread _thread = new Thread();
+
+    public override int MessageCount
     {
-        get { return messageQueue_.Count; }
+        get { return _messageQueue.Count; }
     }
 
     public override void StartServer(int port)
     {
         Stop();
-        state_ = State.Server;
+        _state = State.Server;
 
-        endPoint_ = new IPEndPoint(IPAddress.Any, port);
-        udpClient_ = new UdpClient(endPoint_);
-        thread_.Start(() => 
+        _endPoint = new IPEndPoint(IPAddress.Any, port);
+        _udpClient = new UdpClient(_endPoint);
+        _thread.Start(() => 
         {
-            while (udpClient_.Available > 0) 
+            while (_udpClient.Available > 0) 
             {
-                var buffer = udpClient_.Receive(ref endPoint_);
-                lock (lockObject_)
+                var buffer = _udpClient.Receive(ref _endPoint);
+                lock (_lockObject)
                 {
-                    messageQueue_.Enqueue(buffer);
+                    _messageQueue.Enqueue(buffer);
                 }
             }
         });
@@ -53,33 +54,33 @@ public class Udp : uOSC.Udp
     public override void StartClient(string address, int port)
     {
         Stop();
-        state_ = State.Client;
+        _state = State.Client;
 
         var ip = IPAddress.Parse(address);
-        endPoint_ = new IPEndPoint(ip, port);
-        udpClient_ = new UdpClient();
+        _endPoint = new IPEndPoint(ip, port);
+        _udpClient = new UdpClient();
     }
 
     public override void Stop()
     {
-        if (state_ == State.Stop) return;
+        if (_state == State.Stop) return;
 
-        thread_.Stop();
-        udpClient_.Close();
-        state_ = State.Stop;
+        _thread.Stop();
+        _udpClient.Close();
+        _state = State.Stop;
     }
 
     public override void Send(byte[] data, int size)
     {
-        udpClient_.Send(data, size, endPoint_);
+        _udpClient.Send(data, size, _endPoint);
     }
 
     public override byte[] Receive()
     {
         byte[] buffer;
-        lock (lockObject_)
+        lock (_lockObject)
         {
-            buffer = messageQueue_.Dequeue();
+            buffer = _messageQueue.Dequeue();
         }
         return buffer;
     }

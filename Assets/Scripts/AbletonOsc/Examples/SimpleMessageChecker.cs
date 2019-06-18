@@ -12,21 +12,17 @@ namespace AbletonOsc.Examples
 
         private void Start()
         {
-            LiveOscManager.Instance.OnDataReceived.AddListener(OnDataReceived);
+            LiveOscManager.Instance.SetAddressHandler(responseAddress, OnDataReceived);
         }
 
         private void OnDataReceived(Message message)
         {
-            if (message.address != responseAddress) return;
+            if (message.Values.Length <= 0) return;
 
-            if (message.values.Length <= 0) return;
+            var value = message.GetFloat(0);
 
-            var value = message.values[0];
+            var scale = new Vector3(value, value, value);
 
-            if (!(value is float)) return;
-
-            var floatNum = (float) value;
-            var scale = new Vector3(floatNum, floatNum, floatNum);
             transform.localScale = scale;
         }
     }
