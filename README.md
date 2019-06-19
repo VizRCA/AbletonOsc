@@ -124,7 +124,7 @@ To get data from a message, you can get the type using its index in the message 
 private void OnDataReceived(Message message)
 {
     // Example message is "/fromlive/parameter 0.5f 4 clipped"
-    if (message.values.Length <= 3) return;
+    if (message.values.Length != 3) return;
 
     var floatValue = message.GetFloat(0);
 
