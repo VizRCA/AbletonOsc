@@ -114,10 +114,10 @@ float[] postionXyz = new float[]{1f,2f,3f};
 LiveOscManager.Instance.Send("/object/x/position", positionXyz);
 
 // DO THIS
-LiveOscManager.Instance.Send("/object/x/position", positionXyz[0], positionXyz[1], positionXyz[1]);
+LiveOscManager.Instance.Send("/object/x/position", positionXyz[0], positionXyz[1], positionXyz[2]);
 ```
 
-If you are sending lots of arrays, you can write a wrapper to convert arrays to lists of object suitable for the clent sending process.
+If you are sending lots of arrays, you can write a wrapper to convert arrays to lists of object suitable for the client sending process.
 
 To get data from a message, you can get the type using its index in the message parameters array
 ```csharp
