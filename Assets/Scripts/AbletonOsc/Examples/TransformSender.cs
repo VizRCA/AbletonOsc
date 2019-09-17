@@ -10,6 +10,7 @@ namespace AbletonOsc.Examples
         [Header("OSC")]
         public int objectId;
         public string address = "/object";
+        public float frequency = 50;
         
         [Header("Position")]
         public bool sendPosition = true;
@@ -37,7 +38,16 @@ namespace AbletonOsc.Examples
         private Message _rotation;
         private Message _scale;
 
-        private void PrepBundle()
+        private float _tF;
+        private float _tD;
+
+		private void OnEnable()
+		{
+            _tF = 1f / frequency;
+            _tD = 0;
+		}
+
+		private void PrepBundle()
         {
             _bundle = new Bundle(Timestamp.Now);
 
@@ -80,6 +90,9 @@ namespace AbletonOsc.Examples
 
         private void FixedUpdate()
         {
+            _tD += Time.fixedDeltaTime;
+            if (_tD < _tF) return;
+            _tD = 0;
             PrepBundle();
             LiveOscManager.Instance.Send(_bundle);
         }
